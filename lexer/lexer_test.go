@@ -2,7 +2,7 @@
 package lexer
 
 import (
-	"synta/token"
+	"synta-lexical/token"
 	"testing"
 )
 

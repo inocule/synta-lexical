@@ -2,7 +2,7 @@
 package lexer
 
 import (
-	"synta/token"
+	"synta-lexical/token"
 	"unicode"
 )
 
@@ -65,60 +65,60 @@ func (l *Lexer) readIdentifier() string {
 func (l *Lexer) readNumber() (string, token.TokenType) {
 	start := l.pos
 	tokenType := token.INTEGER
-
 	for l.pos < len(l.input) && unicode.IsDigit(rune(l.input[l.pos])) {
 		l.advance()
 	}
-
 	if l.pos < len(l.input) && l.input[l.pos] == '.' &&
 		l.pos+1 < len(l.input) && unicode.IsDigit(rune(l.input[l.pos+1])) {
 		tokenType = token.FLOAT
-		l.advance() // consume '.'
+		l.advance()
 		for l.pos < len(l.input) && unicode.IsDigit(rune(l.input[l.pos])) {
 			l.advance()
 		}
 	}
-
 	return l.input[start:l.pos], tokenType
 }
 
 func (l *Lexer) readString() string {
-	quote := l.advance() // consume opening quote
+	quote := l.advance()
 	start := l.pos
-
 	for l.pos < len(l.input) && l.input[l.pos] != quote {
 		if l.input[l.pos] == '\\' {
-			l.advance() // skip escape char
+			l.advance()
 		}
 		l.advance()
 	}
-
 	str := l.input[start:l.pos]
 	if l.pos < len(l.input) {
-		l.advance() // consume closing quote
+		l.advance()
 	}
 	return str
 }
 
-func (l *Lexer) skipComment() {
-	if l.peek(0) == '/' && l.peek(1) == '/' {
-		// Single-line comment
-		for l.pos < len(l.input) && l.input[l.pos] != '\n' {
-			l.advance()
-		}
-	} else if l.peek(0) == '/' && l.peek(1) == '~' {
-		// Multi-line comment
-		l.advance() // /
-		l.advance() // ~
-		for l.pos < len(l.input)-1 {
-			if l.input[l.pos] == '~' && l.input[l.pos+1] == '/' {
-				l.advance()
-				l.advance()
-				break
-			}
-			l.advance()
-		}
+func (l *Lexer) readLineComment() string {
+	l.advance() // first /
+	l.advance() // second /
+	start := l.pos
+	for l.pos < len(l.input) && l.input[l.pos] != '\n' {
+		l.advance()
 	}
+	return l.input[start:l.pos]
+}
+
+func (l *Lexer) readMultiComment() string {
+	l.advance() // /
+	l.advance() // ~
+	start := l.pos
+	for l.pos < len(l.input)-1 {
+		if l.input[l.pos] == '~' && l.input[l.pos+1] == '/' {
+			text := l.input[start:l.pos]
+			l.advance() // ~
+			l.advance() // /
+			return text
+		}
+		l.advance()
+	}
+	return l.input[start:l.pos]
 }
 
 func (l *Lexer) addToken(tokenType token.TokenType, lexeme string, line, column int) {
@@ -133,17 +133,40 @@ func (l *Lexer) addToken(tokenType token.TokenType, lexeme string, line, column 
 func (l *Lexer) Tokenize() []token.Token {
 	for l.pos < len(l.input) {
 		l.skipWhitespace()
-
 		if l.pos >= len(l.input) {
 			break
 		}
-
 		line, column := l.line, l.column
 		ch := l.peek(0)
 
 		// Comments
-		if ch == '/' && (l.peek(1) == '/' || l.peek(1) == '~') {
-			l.skipComment()
+		if ch == '/' && l.peek(1) == '/' {
+			text := l.readLineComment()
+			l.addToken(token.COMMENT_LINE, "//"+text, line, column)
+			continue
+		}
+		if ch == '/' && l.peek(1) == '~' {
+			text := l.readMultiComment()
+			l.addToken(token.COMMENT_MULTI, "/~"+text+"~/", line, column)
+			continue
+		}
+
+		// @ decorators (@agent, @task)
+		if ch == '@' {
+			l.advance()
+			if unicode.IsLetter(rune(l.peek(0))) {
+				ident := l.readIdentifier()
+				switch ident {
+				case "agent":
+					l.addToken(token.AT_AGENT, "@agent", line, column)
+				case "task":
+					l.addToken(token.AT_TASK, "@task", line, column)
+				default:
+					l.addToken(token.ILLEGAL, "@"+ident, line, column)
+				}
+			} else {
+				l.addToken(token.ILLEGAL, "@", line, column)
+			}
 			continue
 		}
 
@@ -189,6 +212,9 @@ func (l *Lexer) Tokenize() []token.Token {
 			} else if l.peek(0) == '=' {
 				l.advance()
 				l.addToken(token.MINUS_ASSIGN, "-=", line, column)
+			} else if l.peek(0) == '>' {
+				l.advance()
+				l.addToken(token.ARROW, "->", line, column)
 			} else {
 				l.addToken(token.MINUS, "-", line, column)
 			}
@@ -221,8 +247,11 @@ func (l *Lexer) Tokenize() []token.Token {
 			if l.peek(0) == '=' {
 				l.advance()
 				l.addToken(token.EQ, "==", line, column)
+			} else if l.peek(0) == ':' {
+				l.advance()
+				l.addToken(token.ASSIGN, "=:", line, column)
 			} else {
-				l.addToken(token.ASSIGN, "=", line, column)
+				l.addToken(token.ILLEGAL, "=", line, column)
 			}
 		case ':':
 			l.advance()
@@ -308,7 +337,6 @@ func (l *Lexer) Tokenize() []token.Token {
 			l.addToken(token.ILLEGAL, string(ch), line, column)
 		}
 	}
-
 	l.addToken(token.EOF, "", l.line, l.column)
 	return l.tokens
 }

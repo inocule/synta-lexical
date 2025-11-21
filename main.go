@@ -3,14 +3,28 @@ package main
 
 import (
 	"fmt"
-	"synta/lexer"
-	"synta/token"
+	"synta-lexical/lexer"
+	"synta-lexical/token"
 )
 
 func main() {
 	code := `
-	bind x := 10;
-	const PI := 3.14;
+	@agent AICoder {
+		role: "Chatbot with GitHub MCP access"
+		tools: [github_mcp, slm_chatbot]
+		model: "local/llama-3.1-8b.gguf"
+		mode: "hybrid"
+		sys_prompt: "You are a chatbot capable of helping coders who is updated on GitHub repositories"
+	}
+	
+	@task {
+		response := AICoder -> "Fix this line of text"
+		print(response)
+	}
+
+	bind int x =: 10;
+	const PI =: 3.14;
+	x =: 20;
 	
 	fn calculate(a, b) {
 		if a > b {
@@ -20,14 +34,18 @@ func main() {
 		}
 	}
 	
-	// This is a comment
-	for i := 0; i < 5; i++ {
-		print("Hello");
-	}
+	// This is a one-line comment
+	/~ 
+	This is a 
+	multi-line 
+	comment 
+	~/
 	
-	// AI keywords
-	think "What should I do next?";
-	reason about_problem;
+	int i =: 0;
+	while i < 5 {
+		print("Hello World");
+		i++;
+	}
 	`
 
 	l := lexer.New(code)
