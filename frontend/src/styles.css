@@ -1,0 +1,48 @@
+.root, html, body { height: 100%; }
+html, body { margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
+
+:root {
+	--bg: #0b1020;
+	--panel: #0f1724;
+	--muted: #94a3b8;
+	--accent: #7c3aed;
+	--surface-2: #0b1220;
+	--border: #172033;
+	--table-header: #0f1724;
+	--text: #e6eef8;
+}
+
+body { background: var(--bg); color: var(--text); overflow: hidden; }
+
+.app-grid { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; gap: 12px; padding: 12px; box-sizing: border-box; }
+.left { display:flex; flex-direction: column; gap: 8px; }
+.pane { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(2,6,23,0.6); overflow: hidden; display: flex; flex-direction: column; }
+.editor { flex: 1; min-height: 0; /* allow inner scrolling */ }
+.right { padding: 12px; min-height: 0; }
+
+.toolbar { padding: 8px 12px; display:flex; gap: 8px; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.02); }
+.toolbar button { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); color: var(--text); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+.toolbar .err { color: #ff7b7b; font-size: 0.9rem }
+
+.editorContainer { height: 100%; overflow: auto; }
+.outputContainer { height: 100%; overflow: auto; }
+
+table { width: 100%; border-collapse: collapse; }
+thead th { position: sticky; top: 0; background: var(--table-header); padding: 10px; text-align: left; color: var(--muted); font-weight: 600; }
+tbody td { padding: 10px; border-top: 1px solid rgba(255,255,255,0.02); }
+tbody tr:hover { background: rgba(255,255,255,0.015); }
+
+/* Token decoration classes for Monaco inlineClassName */
+.tok-keyword { color: #ffb86b !important; font-weight: 600 !important; }
+.tok-identifier { color: #9aedff !important; }
+.tok-string { color: #9ae6a6 !important; }
+.tok-number { color: #ff8bd8 !important; }
+.tok-comment { color: #6b7280 !important; font-style: italic !important; }
+.tok-operator { color: #f8f38b !important; }
+.tok-illegal { background: rgba(255,0,0,0.12) !important; color: #ffdddd !important; }
+
+/* Small helpers */
+.flex { display:flex; gap:8px; }
+.grow { flex:1 }
+
