@@ -2,47 +2,370 @@
 html, body { margin: 0; padding: 0; }
 body { font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
 
-:root {
-	--bg: #0b1020;
-	--panel: #0f1724;
-	--muted: #94a3b8;
-	--accent: #7c3aed;
-	--surface-2: #0b1220;
-	--border: #172033;
-	--table-header: #0f1724;
-	--text: #e6eef8;
+/* ===== Base & Reset ===== */
+.root, html, body { 
+  height: 100%; 
 }
 
-body { background: var(--bg); color: var(--text); overflow: hidden; }
+html, body { 
+  margin: 0; 
+  padding: 0; 
+}
 
-.app-grid { display: grid; grid-template-columns: 1fr 1fr; height: 100vh; gap: 12px; padding: 12px; box-sizing: border-box; }
-.left { display:flex; flex-direction: column; gap: 8px; }
-.pane { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(2,6,23,0.6); overflow: hidden; display: flex; flex-direction: column; }
-.editor { flex: 1; min-height: 0; /* allow inner scrolling */ }
-.right { padding: 12px; min-height: 0; }
+body { 
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-.toolbar { padding: 8px 12px; display:flex; gap: 8px; align-items:center; border-bottom: 1px solid rgba(255,255,255,0.02); }
-.toolbar button { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(255,255,255,0.04); color: var(--text); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-.toolbar .err { color: #ff7b7b; font-size: 0.9rem }
+/* ===== Design Tokens - Reversed Maroon Theme ===== */
+:root {
+  /* Base Colors - Reversed Warm Palette */
+  --bg: #2d1f23;              /* was light background -> dark */
+  --panel: #1a1a1a;           /* panels now dark */
+  --panel-secondary: #2c2c2c; /* secondary panel dark */
+  --muted: #d7c2c2;           /* muted text lighter */
+  --accent: #f0c0c5;          /* accent now light maroon/pinkish */
+  --accent-hover: #e6a0a5;    /* hover lighter */
+  --accent-light: #4d2b32;    /* light accent becomes dark */
+  --surface-2: #0f0f0f;       /* surface darker */
+  --border: #33292b;           /* borders dark */
+  --border-hover: #4a3a3d;     /* hover border lighter */
+  --table-header: #2c2c2c;     /* table header dark */
+  --text: #faf7f5;             /* text becomes light */
+  --text-secondary: #d7c2c2;   /* secondary text lighter */
+  --error: #f87171;            /* error brighter */
+  --success: #34d399;          /* success lighter */
+  --warning: #fbbf24;          /* warning lighter */
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(240, 192, 197, 0.08);
+  --shadow-md: 0 4px 12px rgba(240, 192, 197, 0.1);
+  --shadow-lg: 0 10px 30px rgba(240, 192, 197, 0.15);
+  --shadow-inner: inset 0 2px 4px rgba(240, 192, 197, 0.06);
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-.editorContainer { height: 100%; overflow: auto; }
-.outputContainer { height: 100%; overflow: auto; }
+/* ===== Base Styles ===== */
+body { 
+  background: var(--bg); 
+  color: var(--text); 
+  overflow: hidden; 
+}
 
-table { width: 100%; border-collapse: collapse; }
-thead th { position: sticky; top: 0; background: var(--table-header); padding: 10px; text-align: left; color: var(--muted); font-weight: 600; }
-tbody td { padding: 10px; border-top: 1px solid rgba(255,255,255,0.02); }
-tbody tr:hover { background: rgba(255,255,255,0.015); }
+/* ===== Layout ===== */
+.app-grid { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  height: 100vh; 
+  gap: var(--spacing-lg); 
+  padding: var(--spacing-xl); 
+  box-sizing: border-box; 
+}
 
-/* Token decoration classes for Monaco inlineClassName */
-.tok-keyword { color: #ffb86b !important; font-weight: 600 !important; }
-.tok-identifier { color: #9aedff !important; }
-.tok-string { color: #9ae6a6 !important; }
-.tok-number { color: #ff8bd8 !important; }
-.tok-comment { color: #6b7280 !important; font-style: italic !important; }
-.tok-operator { color: #f8f38b !important; }
-.tok-illegal { background: rgba(255,0,0,0.12) !important; color: #ffdddd !important; }
+.left { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 0;
+}
 
-/* Small helpers */
-.flex { display:flex; gap:8px; }
-.grow { flex:1 }
+.pane { 
+  background: var(--panel); 
+  border: 1px solid var(--border); 
+  border-radius: var(--radius-lg); 
+  box-shadow: var(--shadow-md); 
+  overflow: hidden; 
+  display: flex; 
+  flex-direction: column;
+  transition: all var(--transition-base);
+}
 
+.pane:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-lg);
+}
+
+.editor { 
+  flex: 1; 
+  min-height: 0;
+}
+
+.right { 
+  padding: 0; 
+  min-height: 0; 
+}
+
+/* ===== Header Title ===== */
+.app-grid::before {
+  content: 'Synta Lexical Analyzer';
+  position: fixed;
+  top: var(--spacing-xl);
+  left: var(--spacing-xl);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -0.02em;
+  z-index: 100;
+  background: #f0c0c5;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Adjust grid to account for header */
+.app-grid {
+  padding-top: calc(var(--spacing-xl) + 60px);
+}
+
+/* ===== Toolbar ===== */
+.toolbar { 
+  padding: var(--spacing-md) var(--spacing-lg); 
+  display: flex; 
+  gap: var(--spacing-sm); 
+  align-items: center; 
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--panel-secondary), var(--panel));
+}
+
+.toolbar button { 
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover)); 
+  border: none;
+  color: #222020; 
+  padding: 8px 20px; 
+  border-radius: var(--radius-md); 
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  letter-spacing: 0.01em;
+}
+
+.toolbar button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 41, 66, 0.3);
+}
+
+.toolbar button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.toolbar button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toolbar .err { 
+  color: var(--error); 
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(220, 38, 38, 0.08);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+/* ===== Containers ===== */
+.editorContainer { 
+  height: 100%; 
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--surface-2);
+  background: var(--panel-secondary);
+}
+
+.outputContainer { 
+  height: 100%; 
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--surface-2);
+  padding: var(--spacing-lg);
+}
+
+/* Custom Scrollbar for Webkit */
+.editorContainer::-webkit-scrollbar,
+.outputContainer::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.editorContainer::-webkit-scrollbar-track,
+.outputContainer::-webkit-scrollbar-track {
+  background: var(--surface-2);
+}
+
+.editorContainer::-webkit-scrollbar-thumb,
+.outputContainer::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 5px;
+  border: 2px solid var(--surface-2);
+}
+
+.editorContainer::-webkit-scrollbar-thumb:hover,
+.outputContainer::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-hover);
+}
+
+/* ===== Table Styles ===== */
+table { 
+  width: 100%; 
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+thead th { 
+  position: sticky; 
+  top: 0; 
+  background: var(--table-header); 
+  padding: 14px 16px; 
+  text-align: left; 
+  color: var(--accent); 
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 2px solid var(--accent);
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(139, 41, 66, 0.06);
+}
+
+tbody td { 
+  padding: 14px 16px; 
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+  font-size: 0.875rem;
+}
+
+tbody tr { 
+  transition: all var(--transition-fast);
+  background: var(--panel);
+}
+
+tbody tr:hover { 
+  background: var(--accent-light);
+  transform: scale(1.005);
+}
+
+tbody tr:hover td {
+  color: var(--text);
+}
+
+/* ===== Token Decorations ===== */
+.tok-keyword { 
+  color: #b8391a !important; 
+  font-weight: 700 !important; 
+}
+
+.tok-identifier { 
+  color: #1e6b8c !important; 
+}
+
+.tok-string { 
+  color: #15803d !important; 
+}
+
+.tok-number { 
+  color: #a21caf !important; 
+  font-weight: 500 !important;
+}
+
+.tok-comment { 
+  color: #8b6f6f !important; 
+  font-style: italic !important; 
+}
+
+.tok-operator { 
+  color: #ca8a04 !important; 
+  font-weight: 600 !important;
+}
+
+.tok-illegal { 
+  background: rgba(220, 38, 38, 0.15) !important; 
+  color: #dc2626 !important;
+  text-decoration: wavy underline;
+  text-decoration-color: var(--error);
+}
+
+/* ===== Utility Classes ===== */
+.flex { 
+  display: flex; 
+  gap: var(--spacing-sm); 
+}
+
+.grow { 
+  flex: 1; 
+}
+
+/* ===== Focus States ===== */
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.pane {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+/* ===== Selection ===== */
+::selection {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* ===== Additional Enhancements ===== */
+
+/* Code Editor Styling */
+.editorContainer textarea,
+.editorContainer .monaco-editor {
+  background: var(--panel-secondary) !important;
+}
+
+/* Smooth transitions for all interactive elements */
+button, tr, td, th {
+  transition: all var(--transition-fast);
+}
+
+/* Add subtle pattern to background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(139, 41, 66, 0.03) 1px, transparent 0);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: -1;
+}

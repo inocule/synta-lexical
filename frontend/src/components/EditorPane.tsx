@@ -16,31 +16,50 @@ export default function EditorPane({ code, setCode, tokens = [], onRun }: Props)
   const decorationsRef = useRef<string[]>([])
 
   const handleMount: OnMount = (editor, monaco) => {
-    editorRef.current = editor
-    monacoRef.current = monaco
-    // Define a custom dark theme and apply it
-    try {
-      monaco.editor.defineTheme('synta-dark', {
-        base: 'vs-dark',
-        inherit: true,
-        rules: [],
-        colors: {
-          'editor.background': '#071022',
-          'editor.foreground': '#E6EEF8',
-          'editorLineNumber.foreground': '#4b5563',
-          'editorCursor.foreground': '#7c3aed',
-        },
-      })
-      monaco.editor.setTheme('synta-dark')
-    } catch (e) {
-      // ignore theme errors
-    }
+  editorRef.current = editor
+  monacoRef.current = monaco
 
-    // Ctrl/Cmd+Enter to run
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-      onRun?.()
+  // Define a custom dark/reversed theme
+  try {
+    monaco.editor.defineTheme('synta-dark', {
+      base: 'vs-dark', // use dark base
+      inherit: true,
+      rules: [
+        { token: 'keyword', foreground: 'f0c0c5', fontStyle: 'bold' },      // light pink
+        { token: 'identifier', foreground: 'e6a0a5' },                      // softer pink
+        { token: 'string', foreground: '34d399' },                          // green
+        { token: 'number', foreground: 'f0c0f5', fontStyle: 'bold' },       // lighter purple/pink
+        { token: 'comment', foreground: 'd7c2c2', fontStyle: 'italic' },    // muted
+        { token: 'operator', foreground: 'fbbf24', fontStyle: 'bold' },     // yellowish
+      ],
+      colors: {
+        'editor.background': '#2d1f23',             // dark background
+        'editor.foreground': '#faf7f5',             // light text
+        'editorLineNumber.foreground': '#d7c2c2',   // muted line numbers
+        'editorLineNumber.activeForeground': '#f0c0c5', // active line number
+        'editorCursor.foreground': '#f0c0c5',
+        'editor.selectionBackground': '#4d2b32',    // darker selection
+        'editor.inactiveSelectionBackground': '#33292b',
+        'editor.lineHighlightBackground': '#33292b',
+        'editor.lineHighlightBorder': '#4a3a3d',
+        'editorWhitespace.foreground': '#4a3a3d',
+        'editorIndentGuide.background': '#33292b',
+        'editorIndentGuide.activeBackground': '#4a3a3d',
+        'editorBracketMatch.background': '#4d2b32',
+        'editorBracketMatch.border': '#f0c0c5',
+      },
     })
+    monaco.editor.setTheme('synta-dark')
+  } catch (e) {
+    // ignore theme errors
   }
+
+  // Ctrl/Cmd+Enter to run
+  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+    onRun?.()
+  })
+}
+
 
   useEffect(() => {
     const editor = editorRef.current
@@ -93,7 +112,17 @@ export default function EditorPane({ code, setCode, tokens = [], onRun }: Props)
         defaultLanguage="plaintext"
         value={code}
         onChange={(value) => setCode(value ?? '')}
-        options={{ minimap: { enabled: false }, fontSize: 13, fontFamily: "Inter, ui-sans-serif" }}
+        options={{ 
+          minimap: { enabled: false }, 
+          fontSize: 14, 
+          fontFamily: "Inter, ui-monospace, monospace",
+          lineHeight: 24,
+          padding: { top: 16, bottom: 16 },
+          scrollBeyondLastLine: false,
+          smoothScrolling: true,
+          cursorBlinking: 'smooth',
+          cursorSmoothCaretAnimation: 'on',
+        }}
         onMount={handleMount}
       />
     </div>
