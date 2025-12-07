@@ -59,7 +59,7 @@ DATA FLOW:
 ### Lexical Analysis
 - **Tokens**: Identifiers, numbers (int/float), strings, operators, delimiters
 - **Comments**: Single-line `!>` and multi-line `<! ... !>` (unified token capture)
-- **Delimiters**: Statement-end token `~` for clear boundaries
+- **Delimiters**: Statement-end token `;` for clear boundaries
 - **Tracking**: Precise line/column position for every token
 - **Newlines**: Optional newline tokens for structure-aware parsers
 
