@@ -2,7 +2,7 @@
 
 > An experimental lexer for an AI-native programming language designed for human–AI collaboration, agentic task execution, and deterministic reasoning.
 
-Synta emphasizes static typing, concurrency primitives, intent-level debugging, and syntax optimized for LLM interpretability. The lexer provides the foundational token stream for Synta's compiler, AI runtime, multi-agent scheduler, and tooling ecosystem.
+Synta emphasizes static typing, concurrency primitives, intent-level debugging, and syntax optimized for SLM/LLM interpretability. The lexer provides the foundational token stream for Synta's compiler, AI runtime, multi-agent scheduler, and tooling ecosystem.
 
 ---
 
